@@ -1,0 +1,65 @@
+# ---- model / lora ----
+model_name_or_path: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+output_dir: "outputs/cpu-qlora-run1"
+seed: 42
+
+# 4-bit quantization — disabled for CPU training
+load_in_4bit: false
+bnb_4bit_quant_type: "nf4"
+bnb_4bit_use_double_quant: false
+bnb_4bit_compute_dtype: "float32"
+
+# LoRA — smaller rank for CPU speed
+lora_r: 8
+lora_alpha: 16
+lora_dropout: 0.05
+lora_target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+
+# ---- data ----
+dataset_name: "tatsu-lab/alpaca"
+dataset_split: "train"
+max_seq_length: 512
+text_field: null
+eval_ratio: 0.02
+num_workers: 0
+
+# ---- train loop ----
+num_epochs: 1
+per_device_train_batch_size: 1
+per_device_eval_batch_size: 1
+gradient_accumulation_steps: 4
+learning_rate: 5.0e-4
+weight_decay: 0.0
+max_grad_norm: 1.0
+warmup_ratio: 0.03
+lr_scheduler_type: "cosine"
+logging_steps: 1
+eval_steps: 200
+save_steps: 200
+max_train_steps: 20
+
+# precision — CPU uses FP32
+bf16: false
+fp16: false
+
+# distributed — single-process
+backend: "gloo"
+find_unused_parameters: false
+
+# profiling / wandb
+use_wandb: false
+wandb_project: "custom-qlora-cpu"
+wandb_run_name: null
+profile: false
+profile_steps: 20
+profile_dir: "profiles"
+
+# CPU-specific
+device: "cpu"
